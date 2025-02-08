@@ -67,6 +67,10 @@ namespace MyApp
                     Console.WriteLine(ConfigManager.GetConfigSummary());
                     break;
 
+                case "updateconfig":
+                    UpdateConfigInteractively();
+                    break;
+
                 case "help":
                     DisplayHelp();
                     break;
@@ -99,25 +103,97 @@ namespace MyApp
         private void RestartProgram()
         {
             try
-                {       
+            {       
                 Console.WriteLine("Resetowanie programu...");
         
-                 // Uruchomienie aplikacji na nowo
+                // Uruchomienie aplikacji na nowo
                 System.Diagnostics.Process.Start(System.AppDomain.CurrentDomain.FriendlyName);
         
                 // Zamknięcie obecnej instancji
                 Environment.Exit(0); 
-                }
+            }
             catch (Exception ex)
-                {
+            {
                 Console.WriteLine($"Błąd podczas restartu programu: {ex.Message}");
-                }
-        }   
+            }
+        }
 
         private void ReloadCalibrationData()
         {
             Console.WriteLine("Ponowne ładowanie danych kalibracyjnych...");
             // Tu można zaimplementować logikę ponownego ładowania danych z bazy
+        }
+
+        private void UpdateConfigInteractively()
+        {
+            Console.WriteLine("Wybierz, który parametr chcesz zmienić:");
+
+            // Przykładowe opcje konfiguracji, które użytkownik może zmienić
+            Console.WriteLine("1. BrokerAddress (adres brokera MQTT)");
+            Console.WriteLine("2. BrokerPort (port brokera MQTT)");
+            Console.WriteLine("3. UserName (nazwa użytkownika)");
+            Console.WriteLine("4. Password (hasło)");
+            Console.WriteLine("5. Topic (temat)");
+            Console.WriteLine("6. Database (ConnectionString)");
+            Console.WriteLine("Wpisz numer opcji, aby edytować, lub 'cancel', aby anulować:");
+
+            string choice = Console.ReadLine();
+
+            switch (choice)
+            {
+                case "1":
+                    Console.WriteLine("Podaj nowy adres brokera:");
+                    string brokerAddress = Console.ReadLine();
+                    ConfigManager.UpdateConfigValue("BrokerAddress", brokerAddress);
+                    break;
+
+                case "2":
+                    Console.WriteLine("Podaj nowy port brokera:");
+                    string brokerPort = Console.ReadLine();
+                    ConfigManager.UpdateConfigValue("BrokerPort", brokerPort);
+                    break;
+
+                case "3":
+                    Console.WriteLine("Podaj nową nazwę użytkownika:");
+                    string userName = Console.ReadLine();
+                    ConfigManager.UpdateConfigValue("UserName", userName);
+                    break;
+
+                case "4":
+                    Console.WriteLine("Podaj nowe hasło:");
+                    string password = Console.ReadLine();
+                    ConfigManager.UpdateConfigValue("Password", password);
+                    break;
+
+                case "5":
+                    Console.WriteLine("Podaj nowy temat:");
+                    string topic = Console.ReadLine();
+                    ConfigManager.UpdateConfigValue("Topic", topic);
+                    break;
+
+                case "6":
+                    UpdateDatabaseConnectionString();
+                    break;
+
+                case "cancel":
+                    Console.WriteLine("Anulowano edycję.");
+                    break;
+
+                default:
+                    Console.WriteLine("Nieznana opcja.");
+                    break;
+            }
+        }
+
+        private void UpdateDatabaseConnectionString()
+        {
+            Console.WriteLine("Podaj nowy ConnectionString do bazy danych (np. Server=127.0.0.1;Database=MyDb;User=myUser;Password=myPassword):");
+            string newConnectionString = Console.ReadLine();
+
+            // Zakładając, że w sekcji [Database] mamy klucz "ConnectionString"
+            ConfigManager.UpdateConfigValue("ConnectionString", newConnectionString);
+            // Automatyczny zapis po zmianie
+            ConfigManager.SaveConfig();  
         }
 
         private void DisplayHelp()
@@ -130,6 +206,7 @@ namespace MyApp
             Console.WriteLine("'testdb' - Test połączenia z bazą danych.");
             Console.WriteLine("'calibration' - Sprawdzenie danych kalibracyjnych.");
             Console.WriteLine("'config' - Wyświetlenie konfiguracji.");
+            Console.WriteLine("'updateconfig' - Zmiana wartości konfiguracji.");
             Console.WriteLine("'exit' - Zamyka program.");
         }
     }

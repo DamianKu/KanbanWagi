@@ -14,6 +14,12 @@ namespace MyApp
         // 24-znakowy statyczny klucz szyfrowania
         private static readonly string EncryptionKey = "5Jd!P1x2L3M@v9X6D8Zq3wR2@UuI3xF"; // Klucz szyfrowania
 
+        static ConfigManager()
+        {
+            // Wczytanie konfiguracji tylko raz, podczas inicjalizacji
+            LoadConfig();
+        }
+
         public static void LoadConfig()
         {
             if (!File.Exists(configFilePath))
@@ -21,27 +27,29 @@ namespace MyApp
                 CreateDefaultConfigFile();
                 Console.WriteLine("Utworzono domyślny plik konfiguracyjny: config.ini");
             }
-
-            try
+            else
             {
-                string[] lines = File.ReadAllLines(configFilePath);
-                foreach (string line in lines)
+                try
                 {
-                    if (!string.IsNullOrWhiteSpace(line) && line.Contains("="))
+                    string[] lines = File.ReadAllLines(configFilePath);
+                    foreach (string line in lines)
                     {
-                        string[] parts = line.Split('=', 2);
-                        string key = parts[0].Trim();
-                        string value = parts[1].Trim();
+                        if (!string.IsNullOrWhiteSpace(line) && line.Contains("="))
+                        {
+                            string[] parts = line.Split('=', 2);
+                            string key = parts[0].Trim();
+                            string value = parts[1].Trim();
 
-                        // Zaszyfrowanie wartości, jeśli jest to wymagane
-                        string decryptedValue = Decrypt(value);
-                        configValues[key] = decryptedValue;
+                            // Zaszyfrowanie wartości, jeśli jest to wymagane
+                            string decryptedValue = Decrypt(value);
+                            configValues[key] = decryptedValue;
+                        }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Błąd podczas wczytywania konfiguracji: {ex.Message}");
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Błąd podczas wczytywania konfiguracji: {ex.Message}");
+                }
             }
         }
 
@@ -56,6 +64,9 @@ namespace MyApp
             {
                 configValues[key] = newValue;
                 Console.WriteLine($"Zaktualizowano wartość {key} na {newValue}.");
+
+                // Zapisz zmieniony plik konfiguracyjny
+                SaveConfig();
             }
             else
             {
